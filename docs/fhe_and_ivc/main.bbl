@@ -1,0 +1,77 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{BCMS20}
+
+\bibitem[BC23]{cryptoeprint:2023/620}
+Benedikt Bünz and Binyi Chen.
+\newblock Protostar: Generic efficient accumulation/folding for special sound protocols.
+\newblock Cryptology ePrint Archive, Paper 2023/620, 2023.
+\newblock \url{https://eprint.iacr.org/2023/620}.
+\newblock URL: \url{https://eprint.iacr.org/2023/620}.
+
+\bibitem[BCL{\etalchar{+}}21]{C:BCLMS21}
+Benedikt B{\"u}nz, Alessandro Chiesa, William Lin, Pratyush Mishra, and Nicholas Spooner.
+\newblock Proof-carrying data without succinct arguments.
+\newblock In Tal Malkin and Chris Peikert, editors, {\em CRYPTO~2021, Part~I}, volume 12825 of {\em {LNCS}}, pages 681--710, Virtual Event, August 2021. Springer, Heidelberg.
+\newblock \href {https://doi.org/10.1007/978-3-030-84242-0_24} {\path{doi:10.1007/978-3-030-84242-0_24}}.
+
+\bibitem[BCMS20]{TCC:BCMS20}
+Benedikt B{\"u}nz, Alessandro Chiesa, Pratyush Mishra, and Nicholas Spooner.
+\newblock Recursive proof composition from accumulation schemes.
+\newblock In Rafael Pass and Krzysztof Pietrzak, editors, {\em TCC~2020, Part~II}, volume 12551 of {\em {LNCS}}, pages 1--18. Springer, Heidelberg, November 2020.
+\newblock \href {https://doi.org/10.1007/978-3-030-64378-2_1} {\path{doi:10.1007/978-3-030-64378-2_1}}.
+
+\bibitem[BGH19]{EPRINT:BowGriHop19}
+Sean Bowe, Jack Grigg, and Daira Hopwood.
+\newblock Halo: Recursive proof composition without a trusted setup.
+\newblock Cryptology ePrint Archive, Report 2019/1021, 2019.
+\newblock \url{https://eprint.iacr.org/2019/1021}.
+
+\bibitem[KS22]{EPRINT:KotSet22}
+Abhiram Kothapalli and Srinath Setty.
+\newblock {SuperNova}: Proving universal machine executions without universal circuits.
+\newblock Cryptology ePrint Archive, Report 2022/1758, 2022.
+\newblock \url{https://eprint.iacr.org/2022/1758}.
+
+\bibitem[KST22]{C:KotSetTzi22}
+Abhiram Kothapalli, Srinath Setty, and Ioanna Tzialla.
+\newblock Nova: Recursive zero-knowledge arguments from folding schemes.
+\newblock In Yevgeniy Dodis and Thomas Shrimpton, editors, {\em CRYPTO~2022, Part~IV}, volume 13510 of {\em {LNCS}}, pages 359--388. Springer, Heidelberg, August 2022.
+\newblock \href {https://doi.org/10.1007/978-3-031-15985-5_13} {\path{doi:10.1007/978-3-031-15985-5_13}}.
+
+\bibitem[Mic23]{nova}
+Microsoft.
+\newblock Nova: Recursive snarks without trusted setup.
+\newblock \url{https://github.com/microsoft/Nova}, 2023.
+\newblock Accessed: 2023-09-26.
+
+\bibitem[Moh23]{sangria}
+Nicolas Mohnblatt.
+\newblock Sangria: a folding scheme for {PLONK}.
+\newblock \url{https://geometry.xyz/notebook/sangria-a-folding-scheme-for-plonk}, 2023.
+\newblock Accessed: 2023-03-30.
+
+\bibitem[Pol22]{plonky2}
+Polygon.
+\newblock Plonky2.
+\newblock \url{https://github.com/mir-protocol/plonky2}, 2022.
+\newblock Accessed: 2023-09-26.
+
+\bibitem[Val08]{TCC:Valiant08}
+Paul Valiant.
+\newblock Incrementally verifiable computation or proofs of knowledge imply time/space efficiency.
+\newblock In Ran Canetti, editor, {\em TCC~2008}, volume 4948 of {\em {LNCS}}, pages 1--18. Springer, Heidelberg, March 2008.
+\newblock \href {https://doi.org/10.1007/978-3-540-78524-8_1} {\path{doi:10.1007/978-3-540-78524-8_1}}.
+
+\bibitem[Wal23a]{part1}
+Michael Walter.
+\newblock Towards verifiable {FHE}: {Proving} correct execution of the external product using {Plonk}.
+\newblock Technical report, Zama, April 2023.
+\newblock Available at \url{https://github.com/zama-ai/publications/raw/main/techreps/2023/verif_comp.pdf}.
+
+\bibitem[Wal23b]{part2}
+Michael Walter.
+\newblock Towards verifiable {TFHE} (part 2): Proving correct execution of the blind rotation using plonk.
+\newblock Technical report, Zama, June 2023.
+\newblock Available at \url{https://github.com/zama-ai/publications/raw/main/techreps/2023/vfhe_eoq_23-q2.pdf}.
+
+\end{thebibliography}

@@ -1,0 +1,73 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{MAGABMMT23}
+
+\bibitem[BBHR18]{ICALP:BBHR18}
+Eli {Ben-Sasson}, Iddo Bentov, Yinon Horesh, and Michael Riabzev.
+\newblock Fast reed-solomon interactive oracle proofs of proximity.
+\newblock In Ioannis Chatzigiannakis, Christos Kaklamanis, D{\'a}niel Marx, and Donald Sannella, editors, {\em ICALP 2018: 45th International Colloquium on Automata, Languages and Programming}, volume 107 of {\em {LIPIcs}}, pages 14:1--14:17. Schloss Dagstuhl, July 2018.
+\newblock \href {https://doi.org/10.4230/LIPIcs.ICALP.2018.14} {\path{doi:10.4230/LIPIcs.ICALP.2018.14}}.
+
+\bibitem[BCI{\etalchar{+}}20]{FOCS:BCIKS20}
+Eli {Ben-Sasson}, Dan Carmon, Yuval Ishai, Swastik Kopparty, and Shubhangi Saraf.
+\newblock Proximity gaps for reed-solomon codes.
+\newblock In {\em 61st Annual Symposium on Foundations of Computer Science}, pages 900--909. {IEEE} Computer Society Press, November 2020.
+\newblock \href {https://doi.org/10.1109/FOCS46700.2020.00088} {\path{doi:10.1109/FOCS46700.2020.00088}}.
+
+\bibitem[BGK{\etalchar{+}}23]{DBLP:journals/iacr/BlockGKTTZ23}
+Alexander~R. Block, Albert Garreta, Jonathan Katz, Justin Thaler, Pratyush~Ranjan Tiwari, and Michal Zajac.
+\newblock Fiat-shamir security of {FRI} and related snarks.
+\newblock {\em {IACR} Cryptol. ePrint Arch.}, page 1071, 2023.
+
+\bibitem[BGS{\etalchar{+}}]{zkp_mooc}
+Dan Boneh, Shafi Goldwasser, Dawn Song, Justin Thaler, and Yupeng Zhang.
+\newblock Zero knowledge proofs.
+\newblock \url{https://zk-learning.org}.
+
+\bibitem[GW20]{EPRINT:GabWil20}
+Ariel Gabizon and Zachary~J. Williamson.
+\newblock plookup: {A} simplified polynomial protocol for lookup tables.
+\newblock Cryptology ePrint Archive, Report 2020/315, 2020.
+\newblock \url{https://eprint.iacr.org/2020/315}.
+
+\bibitem[GWC19]{EPRINT:GabWilCio19}
+Ariel Gabizon, Zachary~J. Williamson, and Oana Ciobotaru.
+\newblock {PLONK}: Permutations over lagrange-bases for oecumenical noninteractive arguments of knowledge.
+\newblock Cryptology ePrint Archive, Report 2019/953, 2019.
+\newblock \url{https://eprint.iacr.org/2019/953}.
+
+\bibitem[MAGABMMT23]{cryptoeprint:2023/474}
+Héctor Masip-Ardevol, Marc Guzmán-Albiol, Jordi Baylina-Melé, and Jose~Luis Muñoz-Tapia.
+\newblock estark: Extending starks with arguments.
+\newblock Cryptology ePrint Archive, Paper 2023/474, 2023.
+\newblock \url{https://eprint.iacr.org/2023/474}.
+\newblock URL: \url{https://eprint.iacr.org/2023/474}.
+
+\bibitem[PFM{\etalchar{+}}22]{EPRINT:PFMBM22}
+Luke Pearson, Joshua Fitzgerald, H{\'e}ctor Masip, Marta Bell{\'e}s-Mu{\~n}oz, and Jose~Luis Mu{\~n}oz-Tapia.
+\newblock {PlonKup}: Reconciling {PlonK} with plookup.
+\newblock Cryptology ePrint Archive, Report 2022/086, 2022.
+\newblock \url{https://eprint.iacr.org/2022/086}.
+
+\bibitem[Pol22]{plonky2}
+Polygon.
+\newblock Plonky2.
+\newblock \url{https://github.com/mir-protocol/plonky2}, 2022.
+\newblock Accessed: 2023-09-26.
+
+\bibitem[Sta21]{EPRINT:StarkWare21}
+StarkWare.
+\newblock {ethSTARK} documentation.
+\newblock Cryptology ePrint Archive, Report 2021/582, 2021.
+\newblock \url{https://eprint.iacr.org/2021/582}.
+
+\bibitem[Zca]{halo2}
+Zcash.
+\newblock The halo2 book.
+\newblock \url{https://zcash.github.io/halo2/index.html}.
+
+\bibitem[zkh]{zk_sessions}
+zkhack.dev.
+\newblock Zk whiteboard sessions.
+\newblock \url{https://zkhack.dev/whiteboard/}.
+
+\end{thebibliography}
