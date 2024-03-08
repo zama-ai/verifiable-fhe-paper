@@ -107,7 +107,7 @@ mod tests {
 
         let m_noisy = decrypt::<F, D, n>(&s, &c);
         let m =
-            (m_noisy.to_canonical_u64() as f64 / delta.to_canonical_u64() as f64).round() as u64;
-        assert_eq!(m, (m1 + m2).to_canonical_u64() % p as u64);
+            (m_noisy.to_canonical_u64() as f64 / delta.to_canonical_u64() as f64).round() as usize % p;
+        assert_eq!(m as u64, (m1 + m2).to_canonical_u64() % p as u64);
     }
 }

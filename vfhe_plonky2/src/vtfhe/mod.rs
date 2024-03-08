@@ -144,7 +144,7 @@ mod tests {
     use crate::vtfhe::crypto::poly::Poly;
 
     use plonky2::field::types::{Field, Sample};
-    use plonky2::iop::witness::PartialWitness;
+    use plonky2::iop::witness::{PartialWitness, WitnessWrite};
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
     use rand::random;
