@@ -94,9 +94,7 @@ impl<const N: usize, const K: usize, const ELL: usize> GlevCt<N, K, ELL> {
         cb: &mut CircuitBuilder<F, D>,
         glwe_poly: &GlwePoly<N>,
     ) -> GlweCt<N, K> {
-        // let num_limbs = ceil_div_usize(log2_ceil(F::ORDER as usize), LOGB);
         let num_limbs = ceil_div_usize(F::BITS, LOGB);
-        // let limbs = vec_decompose::<F, D, LOGB>(cb, &glwe_poly.coeffs, num_limbs);
         let limbs = glwe_poly.decompose::<F, D, LOGB>(cb, num_limbs);
         let limbs_hat = &limbs[num_limbs - ELL..]
             .iter()
@@ -120,11 +118,10 @@ mod tests {
     use crate::vtfhe::crypto::lwe::decrypt;
     use crate::vtfhe::crypto::poly::Poly;
 
-    use plonky2::field::types::{Field, PrimeField64, Sample};
+    use plonky2::field::types::Sample;
     use plonky2::iop::witness::PartialWitness;
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
-    // use crate::vec_arithmetic::build_decomposition_lut;
 
     #[test]
     fn test_glev_mul() {
@@ -137,7 +134,6 @@ mod tests {
 
         let config = CircuitConfig::standard_recursion_config();
         let mut builder = CircuitBuilder::<F, D>::new(config);
-        // build_decomposition_lut::<F, D, LOGB>(&mut builder);
         let mut pw = PartialWitness::new();
 
         let glwe_poly: GlwePoly<N> = GlwePoly::new_from_builder::<F, D>(&mut builder);
@@ -146,8 +142,6 @@ mod tests {
         glwe_poly.register(&mut builder);
         glev_ct.register(&mut builder);
 
-        // glwe_poly.set_to_random::<F, D>(&mut pw);
-        // glev_ct.set_to_random::<F, D>(&mut pw);
         let s = Glwe::<F, D, N, K>::key_gen();
         let m = F::rand();
         let a = Poly::<F, D, N>::rand();
@@ -168,7 +162,7 @@ mod tests {
         let out_glwe_flat = &proof.public_inputs[start..start + GlweCt::<N, K>::num_targets()];
         let out_glwe = Glwe::<F, D, N, K>::from_slice(out_glwe_flat);
         let out_ct = out_glwe.ntt_backward().sample_extract();
-        let m0 = decrypt::<F, D, {N*K}>(&Glwe::<F, D, N, K>::flatten_key(&s), &out_ct);
+        let m0 = decrypt::<F, D, { N * K }>(&Glwe::<F, D, N, K>::flatten_key(&s), &out_ct);
         assert_eq!(m * a.coeffs[0], m0);
     }
 }

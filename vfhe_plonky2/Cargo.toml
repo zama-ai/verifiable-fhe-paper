@@ -2,11 +2,9 @@
 name = "vfhe_plonky2"
 version = "0.1.0"
 edition = "2021"
-default-run = "vfhe_plonky2"
 
 [dependencies]
-#plonky2 = { version = "0.1.3", features = ["timing"]}
-plonky2 = { path = "../plonky2/plonky2", features = ["timing"]}
+plonky2 = { version = "0.1.3", features = ["timing"]}
 anyhow = { version = "1.0" }
 log = { version = "0.4.14" }
 rand = "0.8.5"
@@ -15,19 +13,3 @@ simple-logging = "2.0.2"
 hashbrown = "0.14.2"
 rand_distr = "0.4.3"
 itertools = "0.12.1"
-
-[[bin]]
-name = "repeated-squaring"
-path = "src/repeated_squaring.rs"
-
-[[bin]]
-name = "ivc-prod"
-path = "src/ivc_based_product.rs"
-
-[[bin]]
-name = "bench"
-path = "src/bench.rs"
-
-# [[bin]]
-# name = "ivc-vfhe"
-# path = "src/ivc_based_vfhe.rs"

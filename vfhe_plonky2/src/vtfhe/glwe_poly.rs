@@ -25,14 +25,12 @@ pub fn plus_or_minus<F: RichField + Extendable<D>, const D: usize>(
 
 /// Split the given element into a list of targets, where each one represents a
 /// base-B limb of the element (centered), with little-endian ordering.
-/// TODO: parameterize with ELL and only recompose the ELL ms limbs?
 pub fn decompose<F: RichField + Extendable<D>, const D: usize, const LOGB: usize>(
     cb: &mut CircuitBuilder<F, D>,
     x: Target,
     num_limbs: usize,
 ) -> Vec<Target> {
     let bits = cb.split_le(x, num_limbs * LOGB);
-    // (0..num_limbs).map(|i| {cb.le_sum(bits[i * LOGB..(i + 1) * LOGB].into_iter())}).collect()
     let sgn = bits.last().unwrap();
     let x_centered_lift = plus_or_minus(cb, *sgn, x);
     let bits_centered = cb.split_le(x_centered_lift, num_limbs * LOGB);
@@ -161,17 +159,6 @@ impl<const N: usize> GlwePoly<N> {
         acc
     }
 
-    // pub fn vec_decompose<F: RichField + Extendable<D>, const D: usize, const LOGB: usize>(cb: &mut  CircuitBuilder<F, D>, x: &[Target], num_limbs: usize) -> Vec<Vec<Target>> {
-    //     let decomps = x.iter().map(|xi| {decompose::<F, D, LOGB>(cb, *xi, num_limbs)});
-    //     let mut acc = vec![Vec::new(); num_limbs];
-    //     for t in decomps {
-    //         for i in 0..num_limbs {
-    //             acc[i].push(t[i])
-    //         }
-    //     }
-    //     acc
-    // }
-
     pub fn num_targets() -> usize {
         N
     }
@@ -259,11 +246,9 @@ mod tests {
         let config = CircuitConfig::standard_recursion_config();
         let mut builder = CircuitBuilder::<F, D>::new(config);
 
-        // build_decomposition_lut::<F, D, LOGB>(&mut builder);
         let x = builder.add_virtual_target();
 
         let z = decompose::<F, D, LOGB>(&mut builder, x, num_limbs);
-        // Public inputs are the initial value (provided below) and the result (which is generated).
         builder.register_public_input(x);
 
         builder.register_public_inputs(&z);
@@ -273,7 +258,6 @@ mod tests {
             x,
             F::from_noncanonical_u64((1u64 << 63) + (rand::random::<u32>() as u64)),
         );
-        // pw.set_target(x, F::rand());
 
         let data = builder.build::<C>();
         let proof = data.prove(pw).unwrap();
@@ -307,12 +291,7 @@ mod tests {
         let config = CircuitConfig::standard_recursion_config();
         let mut builder = CircuitBuilder::<F, D>::new(config);
         let x = GlwePoly::<N>::new_from_builder(&mut builder);
-        // let x = builder.add_virtual_targets(N);
-
-        // let z = vec_decompose::<F, D, LOGB>(&mut builder, &x, num_limbs);
         let z = x.decompose::<F, D, LOGB>(&mut builder, num_limbs);
-        // Public inputs are the initial value (provided below) and the result (which is generated).
-        // builder.register_public_inputs(&x);
         x.register(&mut builder);
 
         for zi in z {
@@ -320,9 +299,6 @@ mod tests {
         }
 
         let mut pw = PartialWitness::new();
-        // for xi in x.into_iter() {
-        //     pw.set_target(xi, F::from_canonical_u32(rand::random()));
-        // }
         x.set_to_random::<F, D>(&mut pw);
 
         let data = builder.build::<C>();

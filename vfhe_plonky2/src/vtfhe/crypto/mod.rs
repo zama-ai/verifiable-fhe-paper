@@ -1,4 +1,9 @@
-use log::debug;
+/*
+    This submodule contains the structures that hold the data for the circuits. They
+    can be used to compute and set the inputs and retrieve the outputs of the
+    verifiable circuits.
+*/
+
 use plonky2::{field::extension::Extendable, hash::hash_types::RichField};
 
 use self::{ggsw::Ggsw, poly::Poly};

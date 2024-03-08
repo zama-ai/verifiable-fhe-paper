@@ -376,6 +376,8 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 [[package]]
 name = "plonky2"
 version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31c7acc7871fdaf000d3533116eab95d89ada3dfb82b7bb0231da981323c27d6"
 dependencies = [
  "ahash",
  "anyhow",
@@ -399,6 +401,8 @@ dependencies = [
 [[package]]
 name = "plonky2_field"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d33a655ab5d274f763c292fe7e14577f25e40d9d8607b70ef10b39f8619e60b4"
 dependencies = [
  "anyhow",
  "itertools 0.11.0",
@@ -413,6 +417,8 @@ dependencies = [
 [[package]]
 name = "plonky2_maybe_rayon"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "194db0cbdd974e92d897cd92b74adb3968dc1b967315eb280357c49a7637994e"
 dependencies = [
  "rayon",
 ]
@@ -420,6 +426,8 @@ dependencies = [
 [[package]]
 name = "plonky2_util"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5696e2e2a6bb5c48a6e33fb0dd4d20d0a9472784b709964f337f224e99bd6d06"
 
 [[package]]
 name = "ppv-lite86"

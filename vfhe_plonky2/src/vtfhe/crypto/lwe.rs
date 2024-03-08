@@ -1,5 +1,3 @@
-use std::u64::{MAX, MIN};
-
 use plonky2::{field::extension::Extendable, hash::hash_types::RichField, util::log2_ceil};
 use rand_distr::{Distribution, Normal};
 
@@ -74,7 +72,7 @@ pub fn decrypt<F: RichField + Extendable<D>, const D: usize, const n: usize>(
 mod tests {
     use super::*;
     use plonky2::field::goldilocks_field::GoldilocksField;
-    use plonky2::field::types::{Field, PrimeField64, Sample};
+    use plonky2::field::types::{Field, PrimeField64};
     use rand::random;
 
     #[test]

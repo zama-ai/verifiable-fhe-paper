@@ -1,3 +1,4 @@
+use crate::ntt::params::N;
 use crate::vtfhe::crypto::lwe::mod_switch_ct;
 use crate::vtfhe::{glwe_select, rotate_glwe};
 use anyhow::{ensure, Result};
@@ -52,8 +53,9 @@ where
 
     // IMPORTANT: this number needs to be adjusted according to circuit size.
     // For small circuits it is (1 << 12), but with growing circuit size (e.g. for large N)
-    // this can go up to (1 << 16) or even higher
-    while builder.num_gates() < 1 << 15 {
+    // this can go up to (1 << 16) or even higher. Use try and error.
+    let circuit_size = if N == 8 { 1 << 12 } else { 1 << 15 };
+    while builder.num_gates() < circuit_size {
         builder.add_gate(NoopGate, vec![]);
     }
     builder.build::<C>().common
@@ -221,7 +223,6 @@ where
     let inner_cyclic_latest_lwe_hash =
         HashOutTarget::try_from(&inner_cyclic_pis[hash_lwe_out_range.0..hash_lwe_out_range.1])
             .unwrap();
-    // let inner_cyclic_ksk = &inner_cyclic_pis[ksk_range.0..ksk_range.1];
 
     for (initial_target, inner_cyclic_initial_target) in acc_init
         .flatten()
@@ -230,10 +231,6 @@ where
     {
         builder.connect(*initial_target, *inner_cyclic_initial_target);
     }
-
-    // for (initial_target, inner_cyclic_initial_target) in ksk.iter().flat_map(|lev| lev.flatten()).zip(inner_cyclic_ksk.into_iter()) {
-    //     builder.connect(initial_target, *inner_cyclic_initial_target);
-    // }
 
     // base case or not
     let condition = builder.add_virtual_bool_target_safe();
@@ -310,14 +307,10 @@ where
     )
     .unwrap();
     timing.print();
-    // println!("counter: {}", proof.public_inputs[counter_idx]);
     testv_check = testv_check.left_shift(ct_switched[n]);
     let mut current_acc: Glwe<F, D, N, K> =
         Glwe::from_slice(&proof.public_inputs[latest_acc_range.0..latest_acc_range.1]);
-    // info!("current ct: {:?}", current_acc);
-    // info!("decrypted: {:?}", current_acc.decrypt(&debug_glwe_key));
-    // info!("plaintext: {:?}", testv_check);
-    // info!("body: {}, switched body: {}", ct[n], ct_switched[n]);
+
     info!(
         "Avg error: {}",
         current_acc.get_avg_error(&debug_glwe_key, &testv_check)
@@ -329,7 +322,6 @@ where
 
     for x in 0..n {
         println!("loop {x}");
-        // recursive layer.
         let mut pw = PartialWitness::new();
         pw.set_bool_target(condition, true);
         ggsw.assign(&mut pw, &bsk[x]);
@@ -346,7 +338,6 @@ where
         )
         .unwrap();
         timing.print();
-        // println!("counter: {}", proof.public_inputs[counter_idx]);
         testv_check = testv_check
             .right_shift(ct_switched[x] * (debug_lwe_key[x].to_canonical_u64() as usize));
         current_acc =
@@ -378,7 +369,7 @@ where
     )
     .unwrap();
     timing.print();
-    // println!("counter: {}", proof.public_inputs[counter_idx]);
+
     current_acc = Glwe::from_slice(&proof.public_inputs[latest_acc_range.0..latest_acc_range.1]);
     info!(
         "Avg error: {}",
@@ -505,7 +496,7 @@ mod tests {
     use crate::ntt::params::N;
     use crate::vtfhe::crypto::compute_bsk;
     use crate::vtfhe::crypto::glwe::Glwe;
-    use crate::vtfhe::crypto::lwe::{encrypt, key_gen};
+    use crate::vtfhe::crypto::lwe::encrypt;
     use crate::vtfhe::crypto::poly::Poly;
 
     use plonky2::field::types::Field;
@@ -558,7 +549,6 @@ mod tests {
         type F = <C as GenericConfig<D>>::F;
 
         let s_to = Glwe::<F, D, N, K>::partial_key(n);
-        // let s_lwe = key_gen::<F, D, n>();
         let s_lwe = Glwe::<F, D, N, K>::flatten_partial_key(&s_to, n);
         println!("s_lwe: {:?}", s_lwe);
         let s_glwe = Glwe::<F, D, N, K>::key_gen();
@@ -580,7 +570,6 @@ mod tests {
         );
 
         verify_pbs::<F, C, D, n, N, K, ELL, LOGB>(&out_ct, &ct, &testv, &bsk, &ksk, &proof, &cd);
-        // let m_out = out_ct.decrypt(&s_glwe);
         let m_out = out_ct.decrypt(&s_to);
         println!("output ct: {:?}", out_ct);
         println!("output poly: {:?}", m_out);

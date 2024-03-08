@@ -1,5 +1,4 @@
 use itertools::max;
-use log::info;
 use plonky2::{field::extension::Extendable, hash::hash_types::RichField};
 use std::array::from_fn;
 
@@ -38,15 +37,6 @@ impl<F: RichField + Extendable<D>, const D: usize, const N: usize, const K: usiz
         key
     }
 
-    // pub fn key_from_lwe_key(s_lwe: &[F]) -> Vec<Poly<F, D, N>> {
-    //     let n = s_lwe.len();
-    //     let mut pad = vec![F::ZERO; N * K - n];
-    //     pad.extend_from_slice(s_lwe);
-    //     pad.chunks(N)
-    //         .map(|coeffs| Poly::<F, D, N>::from_slice(coeffs))
-    //         .collect()
-    // }
-
     fn poly_inner(s: &[Poly<F, D, N>], a: &[Poly<F, D, N>]) -> Poly<F, D, N> {
         a.iter()
             .zip(s.iter())
@@ -57,7 +47,7 @@ impl<F: RichField + Extendable<D>, const D: usize, const N: usize, const K: usiz
 
     // noiseless
     pub fn encrypt(s: &[Poly<F, D, N>], m: &Poly<F, D, N>, sigma: f64) -> Self {
-        let mut mask: Vec<Poly<F, D, N>> = (0..K - 1).map(|i| Poly::rand()).collect();
+        let mut mask: Vec<Poly<F, D, N>> = (0..K - 1).map(|_| Poly::rand()).collect();
         let error = Poly::rand_error(sigma);
         let body = Glwe::<F, D, N, K>::poly_inner(s, &mask).add(&error);
         mask.push(body.add(m));

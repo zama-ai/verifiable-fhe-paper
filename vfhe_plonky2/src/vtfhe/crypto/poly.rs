@@ -1,4 +1,3 @@
-use rand_distr::{Distribution, Normal};
 use std::array::from_fn;
 
 use plonky2::{field::extension::Extendable, hash::hash_types::RichField};
@@ -157,7 +156,7 @@ impl<F: RichField + Extendable<D>, const D: usize, const N: usize> Poly<F, D, N>
             (self.scalar_mul(&(-F::ONE)), shift % N)
         }
     }
-    
+
     pub fn left_shift(&self, shift: usize) -> Self {
         let (poly, reduced_shift) = self.reduce_shift(shift);
         Poly {
@@ -190,7 +189,7 @@ mod tests {
     use super::*;
     use crate::ntt::params::{N, TESTG, TESTGHAT};
     use plonky2::field::goldilocks_field::GoldilocksField;
-    use plonky2::field::types::{Field, PrimeField64, Sample};
+    use plonky2::field::types::Field;
 
     #[test]
     fn test_ntt() {

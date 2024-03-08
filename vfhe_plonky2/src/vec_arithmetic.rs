@@ -66,8 +66,7 @@ pub fn vec_inner<F: RichField + Extendable<D>, const D: usize>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use plonky2::field::goldilocks_field::GoldilocksField;
-    use plonky2::field::types::{Field, Sample};
+    use plonky2::field::types::Field;
     use plonky2::iop::witness::{PartialWitness, WitnessWrite};
     use plonky2::plonk::circuit_builder::CircuitBuilder;
     use plonky2::plonk::circuit_data::CircuitConfig;
@@ -86,7 +85,7 @@ mod tests {
         let y = builder.add_virtual_targets(N);
 
         let z = vec_add(&mut builder, &x, &y);
-        // Public inputs are the initial value (provided below) and the result (which is generated).
+        
         builder.register_public_inputs(&x);
         builder.register_public_inputs(&y);
         builder.register_public_inputs(&z);
@@ -126,7 +125,7 @@ mod tests {
         let y = builder.add_virtual_targets(N);
 
         let z = vec_mul(&mut builder, &x, &y);
-        // Public inputs are the initial value (provided below) and the result (which is generated).
+        
         builder.register_public_inputs(&x);
         builder.register_public_inputs(&y);
         builder.register_public_inputs(&z);

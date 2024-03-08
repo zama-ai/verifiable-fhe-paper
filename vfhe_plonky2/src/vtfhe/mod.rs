@@ -1,5 +1,11 @@
+/*
+   This module contains ciphertext structures wrapping plonky2 targets 
+   so that they can be used to construct provable circuits on them. 
+   These are used to implement verifiable circuits for operations on these
+   ciphertexts.
+*/
+
 use self::ggsw_ct::GgswCt;
-use self::glev_ct::GlevCt;
 use self::glwe_ct::GlweCt;
 use self::glwe_poly::GlwePoly;
 use self::lev_ct::LevCt;
@@ -7,7 +13,6 @@ use crate::vec_arithmetic::{vec_add, vec_add_many};
 use plonky2::field::extension::Extendable;
 use plonky2::hash::hash_types::RichField;
 use plonky2::iop::target::{BoolTarget, Target};
-use plonky2::iop::witness::{PartialWitness, WitnessWrite};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::util::log2_ceil;
 use std::array::from_fn;
@@ -17,8 +22,8 @@ pub mod ggsw_ct;
 pub mod glev_ct;
 pub mod glwe_ct;
 pub mod glwe_poly;
-pub mod lev_ct;
 pub mod ivc_based_vpbs;
+pub mod lev_ct;
 
 // the key switch incorporates the sample extraction, hence glwe -> lwe
 // we also assume the ksk is set up nicely so that sample extraction is
@@ -69,82 +74,6 @@ pub fn glwe_select<F: RichField + Extendable<D>, const D: usize, const N: usize,
     let range: [usize; K] = from_fn(|i| i);
     GlweCt {
         polys: range.map(|i| poly_select(cb, control, &left.polys[i], &right.polys[i])),
-    }
-}
-
-pub fn random_access_poly<F: RichField + Extendable<D>, const D: usize, const N: usize>(
-    cb: &mut CircuitBuilder<F, D>,
-    index: Target,
-    polys: Vec<&GlwePoly<N>>,
-) -> GlwePoly<N> {
-    let range: [usize; N] = from_fn(|i| i);
-    GlwePoly {
-        coeffs: range
-            .map(|i| cb.random_access(index, polys.iter().map(|poly| poly.coeffs[i]).collect())),
-    }
-}
-
-pub fn random_access_glwe<
-    F: RichField + Extendable<D>,
-    const D: usize,
-    const N: usize,
-    const K: usize,
->(
-    cb: &mut CircuitBuilder<F, D>,
-    index: Target,
-    glwes: Vec<&GlweCt<N, K>>,
-) -> GlweCt<N, K> {
-    let range: [usize; K] = from_fn(|i| i);
-    GlweCt {
-        polys: range.map(|i| {
-            random_access_poly(cb, index, glwes.iter().map(|glwe| &glwe.polys[i]).collect())
-        }),
-    }
-}
-
-pub fn random_access_glev<
-    F: RichField + Extendable<D>,
-    const D: usize,
-    const N: usize,
-    const K: usize,
-    const ELL: usize,
->(
-    cb: &mut CircuitBuilder<F, D>,
-    index: Target,
-    glevs: Vec<&GlevCt<N, K, ELL>>,
-) -> GlevCt<N, K, ELL> {
-    let range: [usize; ELL] = from_fn(|i| i);
-    GlevCt {
-        glwe_cts: range.map(|i| {
-            random_access_glwe(
-                cb,
-                index,
-                glevs.iter().map(|glev| &glev.glwe_cts[i]).collect(),
-            )
-        }),
-    }
-}
-
-pub fn random_access_ggsw<
-    F: RichField + Extendable<D>,
-    const D: usize,
-    const N: usize,
-    const K: usize,
-    const ELL: usize,
->(
-    cb: &mut CircuitBuilder<F, D>,
-    index: Target,
-    ggsws: &[GgswCt<N, K, ELL>],
-) -> GgswCt<N, K, ELL> {
-    let range: [usize; K] = from_fn(|i| i);
-    GgswCt {
-        glev_cts: range.map(|i| {
-            random_access_glev(
-                cb,
-                index,
-                ggsws.iter().map(|ggsw| &ggsw.glev_cts[i]).collect(),
-            )
-        }),
     }
 }
 
@@ -232,7 +161,7 @@ mod tests {
         let carry = shift % 2;
         shift >>= 1;
         shift += carry;
-        
+
         let mut poly = in_poly;
         let neg_poly = &in_poly.scalar_mul(&(-F::ONE));
         if shift > N {
@@ -275,10 +204,7 @@ mod tests {
         let poly_vals = Poly::<F, D, N>::rand();
         let mask_val = F::rand();
         poly.assign(&mut pw, &poly_vals);
-        pw.set_target(
-            mask_element,
-            mask_val,
-        );
+        pw.set_target(mask_element, mask_val);
 
         let z = rotate_poly::<F, D, N>(&mut builder, &poly, mask_element);
         z.register(&mut builder);
@@ -352,6 +278,7 @@ mod tests {
         }
     }
 
+    // this test is flaky due to rounding error in the mod switch
     #[test]
     fn test_blind_rot() {
         const LOGB: usize = 8;
@@ -374,7 +301,12 @@ mod tests {
         let b_negated = builder.neg(lwe_ct[n]);
         accs.push(rotate_glwe(&mut builder, &acc_in, b_negated));
         for i in 0..n {
-            accs.push(blind_rotation_step::<F, D, LOGB, N, K, ELL>(&mut builder, accs.last().unwrap(), &bsk[i], lwe_ct[i]));
+            accs.push(blind_rotation_step::<F, D, LOGB, N, K, ELL>(
+                &mut builder,
+                accs.last().unwrap(),
+                &bsk[i],
+                lwe_ct[i],
+            ));
         }
 
         accs.last().unwrap().register(&mut builder);
@@ -382,7 +314,7 @@ mod tests {
         for ggsw in &bsk {
             ggsw.register(&mut builder);
         }
-        
+
         for element in &lwe_ct {
             builder.register_public_input(*element);
         }
@@ -398,10 +330,10 @@ mod tests {
 
         let test_ct = Glwe::trivial_ct(testv.clone());
         let bsk_vals = compute_bsk::<F, D, N, K, ELL, LOGB>(&s_lwe, &s, 0f64);
-        let m = F::from_canonical_u64(random::<u64>() % (N as u64)); 
-        let delta = F::from_noncanonical_biguint(F::order() >> log2_ceil(2*N));
+        let m = F::from_canonical_u64(random::<u64>() % (N as u64));
+        let delta = F::from_noncanonical_biguint(F::order() >> log2_ceil(2 * N));
         let lwe_vals = encrypt::<F, D, n>(&s_lwe, &(delta * m), 0f64);
-
+        println!("m: {m}, -Delta * m: {}", -delta * m);
         println!("lwe_ct: {:?}", lwe_vals);
 
         acc_in.assign(&mut pw, &test_ct);
@@ -448,7 +380,6 @@ mod tests {
         let z = glwe_select(&mut builder, counter_is_zero, &glwe1, &glwe2);
         z.register(&mut builder);
 
-
         let poly1 = Poly::<F, D, N>::rand();
         let poly2 = Poly::<F, D, N>::rand();
         let s = Glwe::<F, D, N, K>::key_gen();
@@ -458,11 +389,8 @@ mod tests {
 
         glwe1.assign(&mut pw, &glwe_ct1);
         glwe2.assign(&mut pw, &glwe_ct2);
-        pw.set_target(
-            counter,
-            counter_val,
-        );
-        
+        pw.set_target(counter, counter_val);
+
         let data = builder.build::<C>();
         let proof = data.prove(pw).unwrap();
         let start = 2 * GlweCt::<N, K>::num_targets() + 1;

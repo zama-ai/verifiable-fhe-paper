@@ -3,6 +3,8 @@ use plonky2::hash::hash_types::RichField;
 use plonky2::iop::target::Target;
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 
+// use this path to set the ring dimension N (i.e. for N=512 set the path to "params_512.rs")
+// make sure to adjust the value of circuit_size in line 57 of "ivc_based_vpbs.rs"
 #[path = "params_1024.rs"]
 pub mod params;
 
@@ -87,7 +89,6 @@ mod tests {
         let x = builder.add_virtual_targets(N);
 
         let z = ntt_forward(&mut builder, &x);
-        // Public inputs are the initial value (provided below) and the result (which is generated).
         builder.register_public_inputs(&x);
         builder.register_public_inputs(&z);
         let mut pw = PartialWitness::new();
@@ -95,12 +96,6 @@ mod tests {
 
         let data = builder.build::<C>();
         let proof = data.prove(pw).unwrap();
-        // println!(
-        //     "{:?} + {:?} = {:?}",
-        //     &proof.public_inputs[0..n],
-        //     &proof.public_inputs[n..2*n],
-        //     &proof.public_inputs[2*n..3*n],
-        // );
         let out = &proof.public_inputs[N..2 * N];
 
         for (&actual, expected ) in out.into_iter().zip(params::TESTGHAT) {
@@ -130,12 +125,6 @@ mod tests {
 
         let data = builder.build::<C>();
         let proof = data.prove(pw).unwrap();
-        // println!(
-        //     "{:?} + {:?} = {:?}",
-        //     &proof.public_inputs[0..n],
-        //     &proof.public_inputs[n..2*n],
-        //     &proof.public_inputs[2*n..3*n],
-        // );
         let out = &proof.public_inputs[N..2 * N];
 
         for (&actual, expected ) in out.into_iter().zip(params::TESTG) {
