@@ -22,8 +22,4 @@ with `N=1024`.
 This implementation is purely for academic purposes and not meant for production.
 
 ## License
-Following plonky2, the code in this repository is licensed under either of
-- Apache License, Version 2.0
-- MIT license
-
-at your option.
+This software is distributed under the **BSD-3-Clause-Clear** license. If you have any questions, please contact us at [hello@zama.ai](mailto:hello@zama.ai).
