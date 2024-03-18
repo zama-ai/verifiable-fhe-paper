@@ -1,6 +1,6 @@
 # Verifiable PBS
 
-This project allows to prove an execution of TFHE's PBS using [plonky2](https://github.com/0xPolygonZero/plonky2). For details, see the [paper](insert eprint link). 
+This project allows to prove an execution of TFHE's PBS using [plonky2](https://github.com/0xPolygonZero/plonky2). For details, see the [paper](https://eprint.iacr.org/2024/451). 
 
 ## Parameters
 Most parameters are set in `src/main.rs`, the notable exception being the ring dimension `N`. The latter is set in `src/ntt/mod.rs` by pointing the `param` module to the corresponding `param_{N}.rs` file. We suggest to use `N=8` for testing and `N=1024` to run the `main` file. NTT parameter files are available for other values of `N`, and the folder also contains [Sage](https://www.sagemath.org/) code to generate more. However, choosing another value of `N` might require to set a technical circuit parameter as outlined in [this comment](https://github.com/zama-ai/vPBS/blob/10a7931ae5d5d7f48611557e056fb933d1ec7398/src/vtfhe/ivc_based_vpbs.rs#L54).
