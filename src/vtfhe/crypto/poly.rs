@@ -161,10 +161,12 @@ impl<F: RichField + Extendable<D>, const D: usize, const N: usize> Poly<F, D, N>
         let (poly, reduced_shift) = self.reduce_shift(shift);
         Poly {
             coeffs: from_fn(|i| {
-                if i < N - reduced_shift {
+                // fix subtraction overflow
+                // N - reduced_shift may less than 0
+                if i + reduced_shift < N {
                     poly.coeffs[i + reduced_shift]
                 } else {
-                    -poly.coeffs[i - N + reduced_shift]
+                    -poly.coeffs[i + reduced_shift - N]
                 }
             }),
         }
