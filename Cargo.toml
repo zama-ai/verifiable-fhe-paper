@@ -1,0 +1,15 @@
+[package]
+name = "vfhe_plonky2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+plonky2 = { version = "0.2.0", features = ["timing"]}
+anyhow = { version = "1.0" }
+log = { version = "0.4.14" }
+rand = "0.8.5"
+env_logger = "0.10.0"
+simple-logging = "2.0.2"
+hashbrown = "0.14.2"
+rand_distr = "0.4.3"
+itertools = "0.12.1"
