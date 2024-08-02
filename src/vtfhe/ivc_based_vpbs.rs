@@ -1,5 +1,5 @@
 use crate::ntt::params::N;
-use crate::vtfhe::crypto::lwe::mod_switch_ct;
+use crate::vtfhe::crypto::lwe::{self, mod_switch_ct};
 use crate::vtfhe::{glwe_select, rotate_glwe};
 use anyhow::{ensure, Result};
 use log::{info, Level};
@@ -87,7 +87,10 @@ fn build_step_circuit<
     const n: usize,
 >(
     builder: &mut CircuitBuilder<F, D>,
+    w_1: &F,
+    w_2: &F,
 ) -> (
+    Target,
     Target,
     GlweCt<N, K>,
     GgswCt<N, K, ELL>,
@@ -106,8 +109,22 @@ fn build_step_circuit<
     let n_target = builder.constant(F::from_canonical_usize(n + 2));
     let last_step = builder.is_equal(counter, n_target);
 
+    // create targets for the LWE sample elements
+    let mask_element_1 = builder.add_virtual_target();
+    let mask_element_2 = builder.add_virtual_target();
+
+    // create constant targets for the ciphertext weights (the same weights is applied to each LWE sample element)
+    let weight_1 = builder.constant(*w_1);
+    let weight_2 = builder.constant(*w_2);
+
+    // multiply the LWE sample elements by their respective weights
+    let weighted_mask_element_1 = builder.mul(weight_1, mask_element_1);
+    let weighted_mask_element_2 = builder.mul(weight_2, mask_element_2);
+
+    // add the LWE sample elements 
+    let mask_element = builder.add(weighted_mask_element_1, weighted_mask_element_2);
+    
     // in the first step we need to negate the mask element, because it is actually the body
-    let mask_element = builder.add_virtual_target();
     let neg_mask = builder.neg(mask_element);
     let first_negated_mask = builder.select(first_step, neg_mask, mask_element);
 
@@ -146,7 +163,8 @@ fn build_step_circuit<
     builder.register_public_inputs(&current_lwe_hash_out.elements);
 
     (
-        mask_element,
+        mask_element_1,
+        mask_element_2,
         acc_init,
         ggsw,
         current_acc_in,
@@ -166,7 +184,10 @@ pub fn verified_pbs<
     const ELL: usize,
     const LOGB: usize,
 >(
-    ct: &[F],
+    ct_1: &[F],
+    ct_2: &[F],
+    weight_1: &F,
+    weight_2: &F,
     testv: &Poly<F, D, N>,
     bsk: &[Ggsw<F, D, N, K, ELL>],
     ksk: &Ggsw<F, D, N, K, ELL>,
@@ -191,8 +212,8 @@ where
     let mut builder = CircuitBuilder::<F, D>::new(config.clone());
     let one = builder.one();
 
-    let (lwe_ct, acc_init, ggsw, current_acc_in, counter, current_bsk_hash_in, current_lwe_hash_in) =
-        build_step_circuit::<F, D, LOGB, N, K, ELL, n>(&mut builder);
+    let (lwe_ct_1, lwe_ct_2, acc_init, ggsw, current_acc_in, counter, current_bsk_hash_in, current_lwe_hash_in) =
+        build_step_circuit::<F, D, LOGB, N, K, ELL, n>(&mut builder, weight_1, weight_2);
     let acc_init_range = (0, GlweCt::<N, K>::num_targets());
     let counter_idx = acc_init_range.1;
     let latest_acc_range = (
@@ -275,6 +296,9 @@ where
     let cyclic_circuit_data = builder.build::<C>();
 
     let mut testv_check = testv.clone();
+    let weighted_ct_1 = lwe::multiply_constant(ct_1, weight_1);
+    let weighted_ct_2 = lwe::multiply_constant(ct_2, weight_2);
+    let ct = lwe::add(&weighted_ct_1, &weighted_ct_2);
     let ct_switched = mod_switch_ct(&ct, N);
 
     let mut pw = PartialWitness::new();
@@ -287,7 +311,8 @@ where
 
     ggsw.assign(&mut pw, &Ggsw::dummy_ct());
 
-    pw.set_target(lwe_ct, ct[n]);
+    pw.set_target(lwe_ct_1, ct_1[n]);
+    pw.set_target(lwe_ct_2, ct_2[n]);
 
     pw.set_proof_with_pis_target::<C, D>(
         &inner_cyclic_proof_with_pis,
@@ -325,7 +350,8 @@ where
         let mut pw = PartialWitness::new();
         pw.set_bool_target(condition, true);
         ggsw.assign(&mut pw, &bsk[x]);
-        pw.set_target(lwe_ct, ct[x]);
+        pw.set_target(lwe_ct_1, ct_1[x]);
+        pw.set_target(lwe_ct_2, ct_2[x]);
         pw.set_proof_with_pis_target(&inner_cyclic_proof_with_pis, &proof);
         pw.set_verifier_data_target(&verifier_data_target, &cyclic_circuit_data.verifier_only);
         let root_name = format!("prove step {x}");
@@ -356,7 +382,8 @@ where
     let mut pw = PartialWitness::new();
     pw.set_bool_target(condition, true);
     ggsw.assign(&mut pw, &ksk);
-    pw.set_target(lwe_ct, F::ZERO);
+    pw.set_target(lwe_ct_1, F::ZERO);
+    pw.set_target(lwe_ct_2, F::ZERO);
     pw.set_proof_with_pis_target(&inner_cyclic_proof_with_pis, &proof);
     pw.set_verifier_data_target(&verifier_data_target, &cyclic_circuit_data.verifier_only);
     let root_name = format!("key switch");
@@ -396,7 +423,10 @@ pub fn verify_pbs<
     const LOGB: usize,
 >(
     out_ct: &Glwe<F, D, N, K>,
-    ct: &[F],
+    ct_1: &[F],
+    ct_2: &[F],
+    weight_1: &F,
+    weight_2: &F,
     testv: &Poly<F, D, N>,
     bsk: &[Ggsw<F, D, N, K, ELL>],
     ksk: &Ggsw<F, D, N, K, ELL>,
@@ -450,6 +480,12 @@ pub fn verify_pbs<
         "verifying Step 2",
         check_cyclic_proof_verifier_data(&proof, &cd.verifier_only, &cd.common,).unwrap()
     );
+
+    // add the LWE sample elements
+    let weighted_ct_1 = lwe::multiply_constant(ct_1, weight_1);
+    let weighted_ct_2 = lwe::multiply_constant(ct_2, weight_2);
+    let ct = lwe::add(&weighted_ct_1, &weighted_ct_2);
+
     let hash_bsk_out =
         HashOut::try_from(&proof.public_inputs[hash_bsk_out_range.0..hash_bsk_out_range.1])
             .unwrap();
@@ -561,20 +597,30 @@ mod tests {
         };
         println!("testv: {:?}", testv);
         let delta = F::from_noncanonical_biguint(F::order() >> log2_ceil(2 * N));
-        let m = F::from_canonical_u64(random::<u64>() % (N as u64));
-        println!("message: {delta} * {m} = {}", delta * m);
-        let ct = encrypt::<F, D, n>(&s_lwe, &(delta * m), 0f64);
-        println!("{:?}", ct);
+        let m_1 = F::from_canonical_u64(random::<u64>() % (N as u64));
+        let w_1 = F::ONE;
+        let w_2 = F::TWO;
+        let m_2 = F::from_canonical_u64(random::<u64>() % (N as u64));
+        println!("message 1: {delta} * {m_1} = {}", delta * m_1);
+        println!("weight 1: {w_1}");
+        println!("message 2: {delta} * {m_2} = {}", delta * m_2);
+        println!("weight 2: {w_2}");
+        let ct_1 = encrypt::<F, D, n>(&s_lwe, &(delta * m_1), 0f64);
+        let ct_2 = encrypt::<F, D, n>(&s_lwe, &(delta * m_2), 0f64);
+        println!("ct_1: {:?}", ct_1);
+        println!("ct_2: {:?}", ct_2);
         let (out_ct, proof, cd) = verified_pbs::<F, C, D, n, N, K, ELL, LOGB>(
-            &ct, &testv, &bsk, &ksk, &s_glwe, &s_lwe, &s_to,
+            &ct_1, &ct_2, &w_1, 
+            &w_2, &testv, &bsk, &ksk, &s_glwe, &s_lwe, &s_to,
         );
 
-        verify_pbs::<F, C, D, n, N, K, ELL, LOGB>(&out_ct, &ct, &testv, &bsk, &ksk, &proof, &cd);
+        verify_pbs::<F, C, D, n, N, K, ELL, LOGB>(&out_ct, &ct_1, &ct_2, &w_1, &w_2, &testv, &bsk, &ksk, &proof, &cd);
         let m_out = out_ct.decrypt(&s_to);
         println!("output ct: {:?}", out_ct);
         println!("output poly: {:?}", m_out);
-        println!("in: {m} out: {}", m_out.coeffs[0]);
+        println!("in: {m_1} * {w_1} + {m_2} * {w_2} out: {}", m_out.coeffs[0]);
 
-        check_rotation(&testv, &m_out, &(-delta * m));
+        check_rotation(&testv, &m_out, &(-delta * m_1));
+        check_rotation(&testv, &m_out, &(-delta * m_2));
     }
 }

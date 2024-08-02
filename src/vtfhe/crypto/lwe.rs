@@ -68,6 +68,14 @@ pub fn decrypt<F: RichField + Extendable<D>, const D: usize, const n: usize>(
     body - inner_product(s, &mask)
 }
 
+pub fn multiply_constant<F: RichField + Extendable<D>, const D: usize>(c: &[F], k: &F) -> Vec<F> {
+    c.iter().map(|c| *c * *k).collect()
+}
+
+pub fn add<F: RichField + Extendable<D>, const D: usize>(left: &[F], right: &[F]) -> Vec<F> {
+    left.iter().zip(right).map(|(l, r)| *l + *r).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

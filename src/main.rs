@@ -47,21 +47,25 @@ fn main() -> Result<()> {
     
     let delta = get_delta::<F, D>(2 * p);
     let testv = get_testv(p, delta);
-    let m = F::from_canonical_usize(random::<usize>() % p);
-    let ct = encrypt::<F, D, n>(&s_lwe, &(delta * m), sigma_lwe);
+    let m_1 = F::from_canonical_usize(random::<usize>() % p);
+    let m_2 = F::from_canonical_usize(random::<usize>() % p);
+    let w_1 = F::ONE;
+    let w_2 = F::TWO;
+    let ct_1 = encrypt::<F, D, n>(&s_lwe, &(delta * m_1), sigma_lwe);
+    let ct_2 = encrypt::<F, D, n>(&s_lwe, &(delta * m_2), sigma_lwe);
 
     // prove a PBS
     let (out_ct, proof, cd) =
-        verified_pbs::<F, C, D, n, N, K, ELL, LOGB>(&ct, &testv, &bsk, &ksk, &s_glwe, &s_lwe, &s_to);
+        verified_pbs::<F, C, D, n, N, K, ELL, LOGB>(&ct_1, &ct_2, &w_1, &w_2, &testv, &bsk, &ksk, &s_glwe, &s_lwe, &s_to);
 
     // verify the PBS
-    verify_pbs::<F, C, D, n, N, K, ELL, LOGB>(&out_ct, &ct, &testv, &bsk, &ksk, &proof, &cd);
+    verify_pbs::<F, C, D, n, N, K, ELL, LOGB>(&out_ct, &ct_1, &ct_2, &w_1, &w_2, &testv, &bsk, &ksk, &proof, &cd);
     let m_bar = out_ct.decrypt(&s_to).coeffs;
 
     let m_out = F::from_canonical_usize(
         ((m_bar[0].to_canonical_u64() as f64) / (delta.to_canonical_u64() as f64)).round() as usize
             % (2 * p),
     );
-    info!("in: {m} out: {m_out}");
+    info!("in: {m_1} * {w_1} + {m_2} * {w_2} out: {m_out}");
     Ok(())
 }
